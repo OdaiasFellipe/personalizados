@@ -1,0 +1,10 @@
+[90m= [39m[34;4mApp\Models\Produto[39;24m {#5275
+    [34mnome[39m: "[32mProduto 1[39m",
+    [34mdescricao[39m: "[32mDescrição breve do produto 1.[39m",
+    [34mimagem[39m: "[32mimages/produto1.jpg[39m",
+    [34mpreco[39m: [33m29.9[39m,
+    [34mupdated_at[39m: "[32m2025-03-26 14:16:29[39m",
+    [34mcreated_at[39m: "[32m2025-03-26 14:16:29[39m",
+    [34mid[39m: [35m1[39m,
+  }
+

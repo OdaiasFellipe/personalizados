@@ -1,0 +1,41 @@
+.background-image {
+    background-image: url('/images/background.png');
+    /* Caminho para a imagem */
+    background-size: cover;
+    /* Ajusta a imagem para cobrir todo o fundo */
+    background-position: center;
+    /* Centraliza a imagem */
+    background-repeat: no-repeat;
+    /* Evita repetição da imagem */
+    height: 100vh;
+    /* Define a altura como 100% da altura da janela */
+}
+
+.custom-navbar {
+    background-color: #050505;
+    /* Cor personalizada (laranja) */
+}
+
+html,
+body {
+    height: 100%;
+    /* Garante que a altura da página ocupe 100% da janela */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    /* Define o layout como uma coluna */
+    margin: 0;
+    /* Remove margens padrão */
+}
+
+main {
+    flex: 1;
+    /* Faz o conteúdo principal ocupar o espaço disponível */
+}
+
+footer {
+    margin-top: auto;
+    /* Empurra o rodapé para o final da página */
+}
