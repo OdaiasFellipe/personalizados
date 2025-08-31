@@ -19,5 +19,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Executar seeder da galeria e depoimentos
+        $this->call([
+            GaleriaSeeder::class,
+        ]);
     }
 }
