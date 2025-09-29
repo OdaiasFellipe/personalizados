@@ -8,7 +8,12 @@ class ProdutoController extends Controller
 {
     public function index()
     {
-        $produtos = Produto::all(); // Busca todos os produtos
-        return view('catalogo', compact('produtos'));
+        $produtos = Produto::all();
+        $carrinho = session()->get('cart', []);
+
+        return view('catalogo', [
+            'produtos' => $produtos,
+            'carrinho' => $carrinho,
+        ]);
     }
 }

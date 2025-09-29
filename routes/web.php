@@ -4,6 +4,7 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrcamentoController;
+use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\Admin\ServicoController;
 
 // Rotas públicas do site
@@ -58,6 +59,15 @@ Route::get('/orcamento/teste', function() {
 Route::post('/orcamento', [App\Http\Controllers\OrcamentoController::class, 'store'])->name('orcamentos.store');
 Route::get('/orcamento/sucesso', [App\Http\Controllers\OrcamentoController::class, 'sucesso'])->name('orcamentos.sucesso');
 Route::post('/orcamento/buscar-preco', [App\Http\Controllers\OrcamentoController::class, 'buscarPreco'])->name('orcamentos.buscar-preco');
+
+// Carrinho de produtos (público)
+Route::prefix('carrinho')->name('carrinho.')->group(function () {
+    Route::get('/', [CarrinhoController::class, 'index'])->name('index');
+    Route::post('/adicionar', [CarrinhoController::class, 'adicionar'])->name('adicionar');
+    Route::patch('/{produto}/atualizar', [CarrinhoController::class, 'atualizar'])->name('atualizar');
+    Route::delete('/{produto}', [CarrinhoController::class, 'remover'])->name('remover');
+    Route::delete('/limpar', [CarrinhoController::class, 'limpar'])->name('limpar');
+});
 
 // Rotas da galeria (público)
 Route::get('/galeria', [App\Http\Controllers\GaleriaController::class, 'index'])->name('galeria');

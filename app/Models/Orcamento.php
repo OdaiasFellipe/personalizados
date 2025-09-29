@@ -45,6 +45,16 @@ class Orcamento extends Model
         'enviado_email' => 'boolean'
     ];
 
+    public function getNumeroAttribute(): ?string
+    {
+        return $this->numero_orcamento;
+    }
+
+    public function setNumeroAttribute($value): void
+    {
+        $this->attributes['numero_orcamento'] = $value;
+    }
+
     // Relacionamentos
     public function servicos(): BelongsToMany
     {

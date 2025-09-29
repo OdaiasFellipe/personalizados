@@ -3,6 +3,9 @@
 @section('title', 'Catálogo - NE Fotografias e Personalizados')
 
 @section('content')
+    @php
+        use Illuminate\Support\Str;
+    @endphp
     {{-- Header da página --}}
     <section class="page-header py-5 mb-5">
         <div class="container">
@@ -21,6 +24,20 @@
     {{-- Filtros e busca --}}
     <section class="filter-section mb-5">
         <div class="container">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="card shadow-sm">
@@ -46,6 +63,16 @@
                                     </button>
                                 </div>
                             </div>
+                            <hr class="my-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">
+                                    Selecione os produtos e adicione ao carrinho para solicitar seu orçamento.
+                                </span>
+                                <a href="{{ route('carrinho.index') }}" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-shopping-cart me-2"></i>Ver carrinho
+                                    <span class="badge bg-warning text-dark ms-2">{{ count($carrinho ?? []) }}</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -62,7 +89,17 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="product-card h-100">
                                 <div class="product-image">
-                                    <img src="{{ asset($produto->imagem) }}" 
+                                    @php
+                                        $imagem = $produto->imagem;
+                                        $imagemUrl = $imagem
+                                            ? (Str::startsWith($imagem, ['http://', 'https://'])
+                                                ? $imagem
+                                                : (Str::startsWith($imagem, 'storage/')
+                                                    ? asset($imagem)
+                                                    : asset('storage/' . ltrim($imagem, '/'))))
+                                            : asset('images/produto1.jpg');
+                                    @endphp
+                                    <img src="{{ $imagemUrl }}" 
                                          class="card-img-top" 
                                          alt="{{ $produto->nome }}"
                                          style="height: 250px; object-fit: cover;">
@@ -84,11 +121,27 @@
                                                 R$ {{ number_format($produto->preco, 2, ',', '.') }}
                                             </span>
                                         </div>
-                                        <button class="btn btn-outline-warning btn-sm px-3">
-                                            <i class="fas fa-shopping-cart me-1"></i>
-                                            Comprar
-                                        </button>
                                     </div>
+                                    <form action="{{ route('carrinho.adicionar') }}" method="POST" class="mt-3">
+                                        @csrf
+                                        <input type="hidden" name="produto_id" value="{{ $produto->id }}">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-sort-numeric-up"></i>
+                                            </span>
+                                            <input type="number" name="quantidade" class="form-control" min="1" max="1000" value="1" required>
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="fas fa-cart-plus me-1"></i>
+                                                Adicionar
+                                            </button>
+                                        </div>
+                                    </form>
+                                    @if(isset($carrinho[$produto->id]))
+                                        <p class="text-success small mt-2 mb-0">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Já no carrinho ({{ $carrinho[$produto->id]['quantidade'] }} unidade{{ $carrinho[$produto->id]['quantidade'] > 1 ? 's' : '' }})
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

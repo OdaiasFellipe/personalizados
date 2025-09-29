@@ -61,8 +61,23 @@ class OrcamentoController extends Controller
             ]);
         }
         
-        $produtos = Produto::orderBy('nome')->get();
-        return view('orcamentos.create', compact('produtos'));
+        $cartItems = collect(session()->get('cart', []))->map(function ($item) {
+            $item['subtotal'] = $item['quantidade'] * $item['preco'];
+            return $item;
+        });
+
+        if ($cartItems->isEmpty()) {
+            return redirect()
+                ->route('catalogo')
+                ->with('error', 'Adicione produtos ao carrinho antes de solicitar um orçamento.');
+        }
+
+        $valorEstimado = $cartItems->sum('subtotal');
+
+        return view('orcamentos.create', [
+            'itensCarrinho' => $cartItems,
+            'valorEstimado' => $valorEstimado,
+        ]);
     }
 
     /**
@@ -91,25 +106,31 @@ class OrcamentoController extends Controller
 
             // Criar o orçamento
             $orcamento = Orcamento::create([
-                'numero' => Orcamento::gerarNumeroOrcamento(),
+                'numero_orcamento' => Orcamento::gerarNumeroOrcamento(),
                 'nome_cliente' => $request->nome,
                 'email_cliente' => $request->email,
                 'telefone_cliente' => $request->telefone,
                 'data_evento' => $request->data_evento,
                 'local_evento' => $request->local_evento,
-                'numero_pessoas' => $request->numero_pessoas,
+                'numero_convidados' => $request->numero_pessoas,
                 'observacoes' => $request->observacoes,
                 'status' => 'pendente',
-                'valor_total' => 0, // Será calculado depois
+                'valor_total' => 0,
+                'desconto' => 0,
+                'valor_final' => 0,
+                'tipo_evento' => $request->input('tipo_evento', 'Evento Personalizado'),
             ]);
 
             Log::info('Orçamento criado', ['orcamento_id' => $orcamento->id]);
 
             // Adicionar produtos ao orçamento
             $valorTotal = 0;
-            foreach ($request->produtos as $index => $produtoId) {
-                $produto = Produto::find($produtoId);
-                $quantidade = $request->quantidades[$index] ?? 1;
+            $produtosSelecionados = array_map('intval', array_unique($request->produtos));
+            $quantidades = $request->quantidades;
+
+            foreach ($produtosSelecionados as $produtoId) {
+                $produto = Produto::findOrFail($produtoId);
+                $quantidade = isset($quantidades[$produtoId]) ? (int) $quantidades[$produtoId] : 1;
                 
                 $precoUnitario = $produto->preco;
                 $precoTotal = $precoUnitario * $quantidade;
@@ -129,13 +150,19 @@ class OrcamentoController extends Controller
                 ]);
             }
 
-            // Atualizar valor total
-            $orcamento->update(['valor_total' => $valorTotal]);
+            // Atualizar valores finais
+            $orcamento->update([
+                'valor_total' => $valorTotal,
+                'valor_final' => $valorTotal,
+            ]);
 
             Log::info('Orçamento finalizado', [
                 'numero' => $orcamento->numero,
                 'valor_total' => $valorTotal
             ]);
+
+            // Limpar o carrinho da sessão após solicitar o orçamento
+            session()->forget('cart');
 
             // Enviar email de confirmação (opcional)
             $this->enviarEmailConfirmacao($orcamento);
